@@ -1,38 +1,55 @@
 import { createStore } from "redux";
 
-const add = document.getElementById("add");
-const minus = document.getElementById("minus");
-const number = document.getElementById("number");
+const todoInput = document.getElementById("todo-input");
+const todoButton = document.getElementById("todo-button");
+const todoList = document.getElementById("todo-list");
 
 const ADD = "ADD";
-const MINUS = "MINUS";
+const DELETE = "DELETE";
 
-// reducer is a function that modifies data.
-const reducer = (count = 0, action) => {
-  // whatever it returns, that is the data in my application.
-  switch (action.type){
-    case ADD:
-      return count + 1;
-    case MINUS:
-      return count - 1;
-    default:
-      return count;
-  }
-}
-const countStore = createStore(reducer);
-
-const onChange = () => {
-  number.innerText = countStore.getState();
-}
-countStore.subscribe(onChange);
-
-const handleAdd = () => {
-  countStore.dispatch({type:ADD});
+const reducer = (state = [], action) => {
+  switch (action.type) {
+    case ADD: {
+      state.push(action.text);
+      return state;
+    }
+    case DELETE: {
+      state.splice(action.id - 1, 1);
+      return state;
+    }
+    default: {
+      return state;
+    }
+  };
 };
 
-const handleMinus = () => {
-  countStore.dispatch({type:MINUS});
-}
+const todoStore = createStore(reducer);
 
-add.addEventListener("click",handleAdd);
-minus.addEventListener("click",handleMinus);
+const onSubmit = (e) => {
+  e.preventDefault();
+  todoStore.dispatch({ type: ADD, text: todoInput.value });
+  todoInput.value = "";
+}
+todoButton.addEventListener("click", onSubmit);
+
+const deleteTodo = (e) => {
+  todoStore.dispatch({ type: DELETE, id: e.target.parentNode.id });
+};
+
+const onTodosChange = () => {
+  let id = 0;
+  todoList.innerHTML = "";
+  todoStore.getState().forEach(todo => {
+    const todoItem = document.createElement("li");
+    id += 1;
+    todoItem.id = id;
+    const deleteButton = document.createElement("button");
+    deleteButton.innerText = "delete";
+    deleteButton.addEventListener("click", deleteTodo);
+    todoItem.innerText = todo;
+    todoItem.appendChild(deleteButton);
+    todoList.appendChild(todoItem);
+  });
+};
+
+todoStore.subscribe(onTodosChange);
