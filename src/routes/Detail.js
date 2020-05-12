@@ -1,6 +1,8 @@
 import React from "react";
-export default function Detail (){
+function Detail (){
     return <>
         Detail
     </>
-}
+};
+
+export default Detail;
